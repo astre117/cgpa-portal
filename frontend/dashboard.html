@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div id="customAlert">
+    <div class="alert-box">
+        <div class="alert-icon" id="alertIcon">⚠️</div>
+        <h3 id="alertTitle">Notice</h3>
+        <p id="alertMessage">Something happened.</p>
+        <button class="alert-btn" id="alertBtn" onclick="closeAlert()">OK</button>
+    </div>
+</div>
+<div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
+<div class="sidebar">
+    <h2>🎓 CGPA Portal</h2>
+    <button onclick="window.location.href='dashboard.html'" class="active">Dashboard</button>
+    <button onclick="window.location.href='calculator.html'">CGPA Calculator</button>
+    <button onclick="window.location.href='results.html'">Results History</button>
+    <button onclick="window.location.href='profile.html'">My Profile</button>
+    <button onclick="logout()">Logout</button>
+</div>
+
+    <div class="main-content">
+
+        <div class="dashboard-header">
+            <div>
+                <h1>Student Dashboard</h1>
+                <p>Academic Performance Overview</p>
+            </div>
+            <div class="profile-badge">🎓 Student</div>
+        </div>
+
+        <div class="welcome-section">
+            <div class="avatar-section">
+                <div class="avatar-circle">🎓</div>
+                <div>
+                    <h2 id="welcomeMessage">Welcome Student</h2>
+                    <p>Track your academic performance and manage your CGPA.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="date-card">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="time-icon">⏰</div>
+                <h3 style="margin:0; font-size:14px; color:#666;">Current Date & Time</h3>
+            </div>
+            <p id="liveDateTime">Loading...</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="lastCgpaCard">0.00</h3>
+                <p>Last CGPA</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalCalcCard">0</h3>
+                <p>Calculations</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="statusCard">N/A</h3>
+                <p>Status</p>
+            </div>
+        </div>
+
+        <div class="profile-card">
+            <h3>Student Profile</h3>
+            <p id="studentName">Name: Not Available</p>
+            <p id="studentMatric">Matric Number: Not Available</p>
+        </div>
+
+    </div>
+
+</div>
+
+<footer>
+    <p>Web-Based Student CGPA Calculator System © 2026</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student CGPA Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div id="customAlert">
+    <div class="alert-box">
+        <div class="alert-icon" id="alertIcon">⚠️</div>
+        <h3 id="alertTitle">Notice</h3>
+        <p id="alertMessage">Something happened.</p>
+        <button class="alert-btn" id="alertBtn" onclick="closeAlert()">OK</button>
+    </div>
+</div>
+<div class="auth-container">
+
+    <div class="auth-left">
+        <h1>Student CGPA System</h1>
+        <p>
+            Calculate, manage and monitor your academic
+            performance through a modern web platform.
+        </p>
+    </div>
+
+    <div class="auth-card">
+        <h1>Student CGPA</h1>
+        <h2 id="formTitle">Create Account</h2>
+        <p id="formSubtitle">
+            Create your account to access the CGPA portal
+        </p>
+
+        <!-- SIGNUP FORM -->
+        <form id="signupForm">
+            <input type="text" id="fullname" placeholder="Full Name" required>
+            <input type="text" id="matric" placeholder="Matric Number" required>
+            <input type="email" id="signupEmail" placeholder="Email Address" required>
+            <input type="password" id="signupPassword" placeholder="Password" required>
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+            <label>
+                <input type="checkbox" id="showSignupPassword">
+                Show Password
+            </label>
+            <button type="submit">Create Account</button>
+        </form>
+
+        <!-- LOGIN FORM -->
+        <form id="loginForm" style="display:none;">
+            <input type="email" id="loginEmail" placeholder="Email Address" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <label>
+                <input type="checkbox" id="showLoginPassword">
+                Show Password
+            </label>
+            <button type="submit">Login</button>
+        </form>
+
+        <p id="toggleText">
+            <span id="toggleMessage">Already have an account?</span>
+            <a href="#" id="toggleForm">Login</a>
+        </p>
+    </div>
+
+</div>
+<footer>
+    <p>Web-Based Student CGPA Calculator System © 2026</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

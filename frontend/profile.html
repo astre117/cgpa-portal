@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — CGPA Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="customAlert">
+    <div class="alert-box">
+        <div class="alert-icon" id="alertIcon">⚠️</div>
+        <h3 id="alertTitle">Notice</h3>
+        <p id="alertMessage">Something happened.</p>
+        <button class="alert-btn" id="alertBtn" onclick="closeAlert()">OK</button>
+    </div>
+</div>
+<div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>🎓 CGPA Portal</h2>
+        <button onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button onclick="window.location.href='calculator.html'">CGPA Calculator</button>
+        <button onclick="window.location.href='results.html'">Results History</button>
+        <button onclick="window.location.href='profile.html'" class="active">My Profile</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <div class="calculator-header">
+            <h1>My Profile</h1>
+            <p>View and update your account information.</p>
+        </div>
+
+        <!-- PROFILE DISPLAY CARD -->
+        <div class="calculator-card profile-display-card">
+            <div class="profile-avatar">
+                👤
+            </div>
+            <div class="profile-display-info">
+                <h2 id="profileDisplayName">Loading...</h2>
+                <p id="profileDisplayEmail">Loading...</p>
+            </div>
+        </div>
+
+        <!-- UPDATE INFO CARD -->
+        <div class="calculator-card">
+            <h3>Personal Information</h3>
+            <p class="form-note">Email address cannot be changed.</p>
+
+            <label>Full Name</label>
+            <input
+                type="text"
+                id="profileFullname"
+                placeholder="Enter your full name"
+            >
+
+            <label>Matric Number</label>
+            <input
+                type="text"
+                id="profileMatric"
+                placeholder="Enter your matric number"
+            >
+
+            <label>Email Address</label>
+            <input
+                type="email"
+                id="profileEmail"
+                placeholder="Your email"
+                disabled
+                style="opacity: 0.6; cursor: not-allowed;"
+            >
+
+            <button onclick="updateProfile()">Save Changes</button>
+        </div>
+
+        <!-- CHANGE PASSWORD CARD -->
+        <div class="calculator-card">
+            <h3>Change Password</h3>
+            <p class="form-note">You will be logged out after changing your password.</p>
+
+            <label>Current Password</label>
+            <input
+                type="password"
+                id="oldPassword"
+                placeholder="Enter current password"
+            >
+
+            <label>New Password</label>
+            <input
+                type="password"
+                id="newPassword"
+                placeholder="Enter new password"
+            >
+
+            <label>Confirm New Password</label>
+            <input
+                type="password"
+                id="confirmNewPassword"
+                placeholder="Confirm new password"
+            >
+
+            <button onclick="changePassword()" class="btn-danger">Change Password</button>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+    <p>Web-Based Student CGPA Calculator System © 2026</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
