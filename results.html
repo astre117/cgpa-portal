@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results History</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div id="customAlert">
+    <div class="alert-box">
+        <div class="alert-icon" id="alertIcon">⚠️</div>
+        <h3 id="alertTitle">Notice</h3>
+        <p id="alertMessage">Something happened.</p>
+        <button class="alert-btn" id="alertBtn" onclick="closeAlert()">OK</button>
+    </div>
+</div>
+<div class="dashboard-layout">
+
+    <div class="sidebar">
+        <h2>🎓 CGPA Portal</h2>
+        <button onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button onclick="window.location.href='calculator.html'">CGPA Calculator</button>
+        <button onclick="window.location.href='results.html'">Results History</button>
+        <button onclick="window.location.href='profile.html'">My Profile</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="main-content">
+
+        <div class="calculator-header">
+            <h1>Results History</h1>
+            <p>View all previously calculated CGPA records.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="historyCount">0</h3>
+                <p>Total Records</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="highestCgpa">0.00</h3>
+                <p>Highest CGPA</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="latestCgpa">0.00</h3>
+                <p>Latest CGPA</p>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <h3>CGPA History</h3>
+            <ul id="resultsList"></ul>
+            <button onclick="clearResults()">Clear Results History</button>
+        </div>
+
+    </div>
+
+</div>
+<footer>
+    <p>Web-Based Student CGPA Calculator System © 2026</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
