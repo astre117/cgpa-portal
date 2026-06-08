@@ -25,7 +25,7 @@ function closeAlert() {
 // BASE URL
 // =====================
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://cgpa-portal.onrender.com";
 
 // =====================
 // SESSION HELPERS

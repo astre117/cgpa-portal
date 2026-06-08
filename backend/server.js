@@ -17,7 +17,12 @@ const app = express();
 // MIDDLEWARE
 // =====================
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        "http://localhost:5500",
+        "https://astre117.github.io"
+    ]
+}));
 app.use(express.json());
 
 // =====================
