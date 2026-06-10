@@ -464,6 +464,95 @@ app.put("/api/profile/password", auth, async (req, res) => {
 });
 
 // =====================
+// FORGOT PASSWORD
+// =====================
+
+const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+if (forgotPasswordLink) {
+    forgotPasswordLink.addEventListener("click", function(e) {
+        e.preventDefault();
+        loginForm.style.display         = "none";
+        signupForm.style.display        = "none";
+        forgotPasswordForm.style.display = "block";
+        formTitle.textContent            = "Forgot Password";
+        formSubtitle.textContent         = "Enter your email to receive a reset link";
+        document.getElementById("forgotPasswordText").style.display = "none";
+    });
+}
+
+const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const email = document.getElementById("resetEmail").value.trim();
+
+        try {
+            const res  = await fetch(`${BASE_URL}/api/forgot-password`, {
+                method:  "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({ email })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                showAlert("Reset link sent! Check your email.", "success");
+            } else {
+                showAlert(data.message || "Failed to send reset link", "error");
+            }
+        } catch (err) {
+            showAlert("Server error. Try again.", "error");
+        }
+    });
+}
+
+// =====================
+// RESET PASSWORD PAGE
+// =====================
+
+const resetPasswordForm = document.getElementById("resetPasswordForm");
+if (resetPasswordForm) {
+    resetPasswordForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const newPassword     = document.getElementById("newResetPassword").value;
+        const confirmPassword = document.getElementById("confirmResetPassword").value;
+
+        if (newPassword !== confirmPassword) {
+            showAlert("Passwords do not match", "error");
+            return;
+        }
+
+        const token = new URLSearchParams(window.location.search).get("token");
+
+        if (!token) {
+            showAlert("Invalid reset link", "error");
+            return;
+        }
+
+        try {
+            const res  = await fetch(`${BASE_URL}/api/reset-password`, {
+                method:  "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({ token, newPassword })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                showAlert("Password reset successfully! Redirecting to login...", "success");
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 2000);
+            } else {
+                showAlert(data.message || "Failed to reset password", "error");
+            }
+        } catch (err) {
+            showAlert("Server error. Try again.", "error");
+        }
+    });
+}
+// =====================
 // START SERVER
 // =====================
 
