@@ -140,11 +140,25 @@ if (signupForm) {
             const data = await res.json();
 
             if (res.ok) {
-                showAlert("Account created successfully! Please log in.", "success");
-                signupForm.style.display = "none";
-                loginForm.style.display  = "block";
-                isLoginMode = true;
-            } else {
+    // Auto-login after registration
+    const loginRes = await fetch(`${BASE_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    });
+
+    const loginData = await loginRes.json();
+
+    if (loginRes.ok) {
+        localStorage.setItem("token", loginData.token);
+        localStorage.setItem("user", JSON.stringify(loginData.user));
+        showAlert("Account created successfully!", "success");
+        setTimeout(() => {
+            window.location.href = "dashboard.html";
+        }, 1000);
+    }
+}
+            else {
                 showAlert(data.message || "Registration failed", "error");
             }
 
