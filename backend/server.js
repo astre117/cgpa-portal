@@ -467,91 +467,91 @@ app.put("/api/profile/password", auth, async (req, res) => {
 // FORGOT PASSWORD
 // =====================
 
-const forgotPasswordLink = document.getElementById("forgotPasswordLink");
-if (forgotPasswordLink) {
-    forgotPasswordLink.addEventListener("click", function(e) {
-        e.preventDefault();
-        loginForm.style.display         = "none";
-        signupForm.style.display        = "none";
-        forgotPasswordForm.style.display = "block";
-        formTitle.textContent            = "Forgot Password";
-        formSubtitle.textContent         = "Enter your email to receive a reset link";
-        document.getElementById("forgotPasswordText").style.display = "none";
-    });
-}
+const nodemailer = require("nodemailer");
+const crypto     = require("crypto");
 
-const forgotPasswordForm = document.getElementById("forgotPasswordForm");
-if (forgotPasswordForm) {
-    forgotPasswordForm.addEventListener("submit", async function(e) {
-        e.preventDefault();
-        const email = document.getElementById("resetEmail").value.trim();
+const resetTokens = {};
 
-        try {
-            const res  = await fetch(`${BASE_URL}/api/forgot-password`, {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ email })
-            });
+app.post("/api/forgot-password", async (req, res) => {
+    const { email } = req.body;
 
-            const data = await res.json();
+    if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+    }
 
-            if (res.ok) {
-                showAlert("Reset link sent! Check your email.", "success");
-            } else {
-                showAlert(data.message || "Failed to send reset link", "error");
-            }
-        } catch (err) {
-            showAlert("Server error. Try again.", "error");
+    try {
+        const student = await Student.findOne({ email });
+
+        if (!student) {
+            return res.status(404).json({ message: "No account found with that email" });
         }
-    });
-}
+
+        const token = crypto.randomBytes(32).toString("hex");
+        resetTokens[token] = { email, expires: Date.now() + 3600000 };
+
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const resetLink = `${process.env.FRONTEND_URL}/reset-password.html?token=${token}`;
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: "CGPA Portal — Password Reset",
+            html: `
+                <h2>Password Reset Request</h2>
+                <p>Click the link below to reset your password. This link expires in 1 hour.</p>
+                <a href="${resetLink}">Reset My Password</a>
+                <p>If you didn't request this, ignore this email.</p>
+            `
+        });
+
+        res.status(200).json({ message: "Reset link sent to your email" });
+
+    } catch (err) {
+        console.log("FORGOT PASSWORD ERROR:", err.message);
+        res.status(500).json({ message: "Server error", error: err.message });
+    }
+});
 
 // =====================
-// RESET PASSWORD PAGE
+// RESET PASSWORD
 // =====================
 
-const resetPasswordForm = document.getElementById("resetPasswordForm");
-if (resetPasswordForm) {
-    resetPasswordForm.addEventListener("submit", async function(e) {
-        e.preventDefault();
+app.post("/api/reset-password", async (req, res) => {
+    const { token, newPassword } = req.body;
 
-        const newPassword     = document.getElementById("newResetPassword").value;
-        const confirmPassword = document.getElementById("confirmResetPassword").value;
+    const record = resetTokens[token];
 
-        if (newPassword !== confirmPassword) {
-            showAlert("Passwords do not match", "error");
-            return;
-        }
+    if (!record || Date.now() > record.expires) {
+        return res.status(400).json({ message: "Reset link is invalid or expired" });
+    }
 
-        const token = new URLSearchParams(window.location.search).get("token");
+    if (!newPassword || newPassword.length < 5) {
+        return res.status(400).json({ message: "Password must be at least 5 characters" });
+    }
 
-        if (!token) {
-            showAlert("Invalid reset link", "error");
-            return;
-        }
+    try {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await Student.findOneAndUpdate(
+            { email: record.email },
+            { password: hashedPassword }
+        );
 
-        try {
-            const res  = await fetch(`${BASE_URL}/api/reset-password`, {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ token, newPassword })
-            });
+        delete resetTokens[token];
 
-            const data = await res.json();
+        res.status(200).json({ message: "Password reset successfully" });
 
-            if (res.ok) {
-                showAlert("Password reset successfully! Redirecting to login...", "success");
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 2000);
-            } else {
-                showAlert(data.message || "Failed to reset password", "error");
-            }
-        } catch (err) {
-            showAlert("Server error. Try again.", "error");
-        }
-    });
-}
+    } catch (err) {
+        console.log("RESET PASSWORD ERROR:", err.message);
+        res.status(500).json({ message: "Server error", error: err.message });
+    }
+});
 // =====================
 // START SERVER
 // =====================
