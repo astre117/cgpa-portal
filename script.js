@@ -94,24 +94,24 @@ if (toggleForm) {
         isLoginMode = !isLoginMode;
 
         if (isLoginMode) {
-            signupForm.style.display        = "none";
-            loginForm.style.display         = "block";
-            forgotPasswordForm.style.display = "none";
-            formTitle.textContent            = "Welcome Back";
-            formSubtitle.textContent         = "Login to continue to your dashboard";
-            toggleMessage.textContent        = "Don't have an account?";
-            toggleForm.textContent           = "Create Account";
-            document.getElementById("forgotPasswordText").style.display = "block";
-        } else {
-            loginForm.style.display          = "none";
-            signupForm.style.display         = "block";
-            forgotPasswordForm.style.display = "none";
-            formTitle.textContent            = "Create Account";
-            formSubtitle.textContent         = "Create your account to access the CGPA portal";
-            toggleMessage.textContent        = "Already have an account?";
-            toggleForm.textContent           = "Login";
-            document.getElementById("forgotPasswordText").style.display = "none";
-        }
+    signupForm.style.display        = "none";
+    loginForm.style.display         = "block";
+    forgotPasswordForm.style.display = "none";
+    formTitle.textContent            = "Welcome Back";
+    formSubtitle.textContent         = "Login to continue to your dashboard";
+    toggleMessage.textContent        = "Don't have an account?";
+    toggleForm.textContent           = "Create Account";
+    document.getElementById("forgotPasswordText").style.display = "block";
+} else {
+    loginForm.style.display          = "none";
+    signupForm.style.display         = "block";
+    forgotPasswordForm.style.display = "none";
+    formTitle.textContent            = "Create Account";
+    formSubtitle.textContent         = "Create your account to access the CGPA portal";
+    toggleMessage.textContent        = "Already have an account?";
+    toggleForm.textContent           = "Login";
+    document.getElementById("forgotPasswordText").style.display = "none";
+}
     });
 }
 
