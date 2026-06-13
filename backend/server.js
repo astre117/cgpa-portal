@@ -467,7 +467,6 @@ app.put("/api/profile/password", auth, async (req, res) => {
 // FORGOT PASSWORD
 // =====================
 
-const nodemailer = require("nodemailer");
 const crypto     = require("crypto");
 
 const resetTokens = {};
@@ -501,25 +500,29 @@ app.post("/api/forgot-password", async (req, res) => {
 
         const resetLink = `${process.env.FRONTEND_URL}/reset-password.html?token=${token}`;
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: "CGPA Portal — Password Reset",
-            html: `
-                <h2>Password Reset Request</h2>
-                <p>Click the link below to reset your password. This link expires in 1 hour.</p>
-                <a href="${resetLink}">Reset My Password</a>
-                <p>If you didn't request this, ignore this email.</p>
-            `
-        });
-
-        res.status(200).json({ message: "Reset link sent to your email" });
-
-    } catch (err) {
-        console.log("FORGOT PASSWORD ERROR:", err.message);
-        res.status(500).json({ message: "Server error", error: err.message });
-    }
+const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY
+    },
+    body: JSON.stringify({
+        sender: { name: "CGPA Portal", email: process.env.EMAIL_USER },
+        to: [{ email: email }],
+        subject: "CGPA Portal — Password Reset",
+        htmlContent: `
+            <h2>Password Reset Request</h2>
+            <p>Click the link below to reset your password. This link expires in 1 hour.</p>
+            <a href="${resetLink}">Reset My Password</a>
+            <p>If you didn't request this, ignore this email.</p>
+        `
+    })
 });
+
+if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.message);
+}
 
 // =====================
 // RESET PASSWORD
