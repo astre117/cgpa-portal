@@ -25,7 +25,7 @@ function closeAlert() {
 // BASE URL
 // =====================
 
-const BASE_URL = "https://cgpa-portal.onrender.com";
+const BASE_URL = "http://localhost:3000";
 
 // =====================
 // SESSION HELPERS
@@ -68,11 +68,22 @@ function checkSession() {
 // SESSION PROTECTION
 // =====================
 
-const protectedPages = ["dashboard.html", "calculator.html", "results.html"];
+const protectedPages = ["dashboard.html", "calculator.html", "results.html", "profile.html", "admin-dashboard.html"];
 const currentPage    = window.location.pathname.split("/").pop();
 
 if (protectedPages.includes(currentPage)) {
     checkSession();
+
+    // ✅ Block students from accessing admin page
+    if (currentPage === "admin-dashboard.html" && localStorage.getItem("role") !== "admin") {
+        window.location.href = "index.html";
+    }
+
+    // ✅ Block admin from accessing student pages
+    const studentOnlyPages = ["dashboard.html", "calculator.html", "results.html", "profile.html"];
+    if (studentOnlyPages.includes(currentPage) && localStorage.getItem("role") === "admin") {
+        window.location.href = "admin-dashboard.html";
+    }
 }
 
 // =====================
@@ -94,24 +105,20 @@ if (toggleForm) {
         isLoginMode = !isLoginMode;
 
         if (isLoginMode) {
-    signupForm.style.display        = "none";
-    loginForm.style.display         = "block";
-    forgotPasswordForm.style.display = "none";
-    formTitle.textContent            = "Welcome Back";
-    formSubtitle.textContent         = "Login to continue to your dashboard";
-    toggleMessage.textContent        = "Don't have an account?";
-    toggleForm.textContent           = "Create Account";
-    document.getElementById("forgotPasswordText").style.display = "block";
-} else {
-    loginForm.style.display          = "none";
-    signupForm.style.display         = "block";
-    forgotPasswordForm.style.display = "none";
-    formTitle.textContent            = "Create Account";
-    formSubtitle.textContent         = "Create your account to access the CGPA portal";
-    toggleMessage.textContent        = "Already have an account?";
-    toggleForm.textContent           = "Login";
-    document.getElementById("forgotPasswordText").style.display = "none";
-}
+            signupForm.style.display  = "none";
+            loginForm.style.display   = "block";
+            formTitle.textContent     = "Welcome Back";
+            formSubtitle.textContent  = "Login to continue to your dashboard";
+            toggleMessage.textContent = "Don't have an account?";
+            toggleForm.textContent    = "Create Account";
+        } else {
+            loginForm.style.display   = "none";
+            signupForm.style.display  = "block";
+            formTitle.textContent     = "Create Account";
+            formSubtitle.textContent  = "Create your account to access the CGPA portal";
+            toggleMessage.textContent = "Already have an account?";
+            toggleForm.textContent    = "Login";
+        }
     });
 }
 
@@ -144,25 +151,11 @@ if (signupForm) {
             const data = await res.json();
 
             if (res.ok) {
-    // Auto-login after registration
-    const loginRes = await fetch(`${BASE_URL}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-    });
-
-    const loginData = await loginRes.json();
-
-    if (loginRes.ok) {
-        localStorage.setItem("token", loginData.token);
-        localStorage.setItem("user", JSON.stringify(loginData.user));
-        showAlert("Account created successfully!", "success");
-        setTimeout(() => {
-            window.location.href = "dashboard.html";
-        }, 1000);
-    }
-}
-            else {
+                showAlert("Account created successfully! Please log in.", "success");
+                signupForm.style.display = "none";
+                loginForm.style.display  = "block";
+                isLoginMode = true;
+            } else {
                 showAlert(data.message || "Registration failed", "error");
             }
 
@@ -194,13 +187,20 @@ if (loginForm) {
             const data = await res.json();
 
             if (res.ok) {
+                // Save token, user, and role
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("user",  JSON.stringify(data.user));
+                localStorage.setItem("role",  data.role);
 
                 showAlert("Login successful!", "success");
 
                 setTimeout(() => {
-                    window.location.href = "dashboard.html";
+                    // ✅ Admin goes to admin dashboard; students go to their dashboard
+                    if (data.role === "admin") {
+                        window.location.href = "admin-dashboard.html";
+                    } else {
+                        window.location.href = "dashboard.html";
+                    }
                 }, 1000);
 
             } else {
@@ -796,95 +796,242 @@ if (currentPage === "profile.html") {
 function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("role");
     localStorage.removeItem("loggedIn");
     window.location.href = "index.html";
 }
-// =====================
-// FORGOT PASSWORD
-// =====================
 
-const forgotPasswordLink = document.getElementById("forgotPasswordLink");
-if (forgotPasswordLink) {
-    forgotPasswordLink.addEventListener("click", function(e) {
-        e.preventDefault();
-        loginForm.style.display         = "none";
-        signupForm.style.display        = "none";
-        forgotPasswordForm.style.display = "block";
-        formTitle.textContent            = "Forgot Password";
-        formSubtitle.textContent         = "Enter your email to receive a reset link";
-        document.getElementById("forgotPasswordText").style.display = "none";
-    });
+// ==========================
+// ADMIN DASHBOARD FUNCTIONS
+// ==========================
+
+async function loadAdminDashboard() {
+    const token = getToken();
+    if (!token) return;
+
+    await loadAdminStats();
+    await loadAdminStudents();
 }
 
-const forgotPasswordForm = document.getElementById("forgotPasswordForm");
-if (forgotPasswordForm) {
-    forgotPasswordForm.addEventListener("submit", async function(e) {
-        e.preventDefault();
-        const email = document.getElementById("resetEmail").value.trim();
+// ---- ADMIN STATS ----
 
-        try {
-            const res  = await fetch(`${BASE_URL}/api/forgot-password`, {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ email })
-            });
+async function loadAdminStats() {
+    const token = getToken();
+    if (!token) return;
 
-            const data = await res.json();
+    try {
+        const res  = await fetch(`${BASE_URL}/api/admin/stats`, {
+            headers: { "Authorization": "Bearer " + token }
+        });
 
-            if (res.ok) {
-                showAlert("Reset link sent! Check your email.", "success");
-            } else {
-                showAlert(data.message || "Failed to send reset link", "error");
-            }
-        } catch (err) {
-            showAlert("Server error. Try again.", "error");
-        }
-    });
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        const totalStudentsEl  = document.getElementById("adminTotalStudents");
+        const totalResultsEl   = document.getElementById("adminTotalResults");
+        const firstClassEl     = document.getElementById("adminFirstClass");
+        const secondUpperEl    = document.getElementById("adminSecondUpper");
+        const secondLowerEl    = document.getElementById("adminSecondLower");
+        const thirdClassEl     = document.getElementById("adminThirdClass");
+        const probationEl      = document.getElementById("adminProbation");
+
+        if (totalStudentsEl) totalStudentsEl.textContent = data.totalStudents;
+        if (totalResultsEl)  totalResultsEl.textContent  = data.totalResults;
+        if (firstClassEl)    firstClassEl.textContent    = data.classCounts["First Class"]        || 0;
+        if (secondUpperEl)   secondUpperEl.textContent   = data.classCounts["Second Class Upper"] || 0;
+        if (secondLowerEl)   secondLowerEl.textContent   = data.classCounts["Second Class Lower"] || 0;
+        if (thirdClassEl)    thirdClassEl.textContent    = data.classCounts["Third Class"]        || 0;
+        if (probationEl)     probationEl.textContent     = data.classCounts["Probation"]          || 0;
+
+    } catch (err) {
+        console.error("Error loading admin stats:", err);
+    }
 }
 
-// =====================
-// RESET PASSWORD PAGE
-// =====================
+// ---- ADMIN STUDENTS TABLE ----
 
-const resetPasswordForm = document.getElementById("resetPasswordForm");
-if (resetPasswordForm) {
-    resetPasswordForm.addEventListener("submit", async function(e) {
-        e.preventDefault();
+async function loadAdminStudents() {
+    const token = getToken();
+    if (!token) return;
 
-        const newPassword     = document.getElementById("newResetPassword").value;
-        const confirmPassword = document.getElementById("confirmResetPassword").value;
+    try {
+        // Fetch students and all results together
+        const [studentsRes, resultsRes] = await Promise.all([
+            fetch(`${BASE_URL}/api/admin/students`, { headers: { "Authorization": "Bearer " + token } }),
+            fetch(`${BASE_URL}/api/admin/results`,  { headers: { "Authorization": "Bearer " + token } })
+        ]);
 
-        if (newPassword !== confirmPassword) {
-            showAlert("Passwords do not match", "error");
+        const students = await studentsRes.json();
+        const results  = await resultsRes.json();
+
+        const tbody = document.getElementById("adminStudentTableBody");
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+
+        if (students.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No students registered yet.</td></tr>`;
             return;
         }
 
-        const token = new URLSearchParams(window.location.search).get("token");
+        students.forEach(student => {
+            // Calculate this student's cumulative CGPA from results
+            const studentResults = results.filter(r => r.studentEmail === student.email);
+            const allCourses     = studentResults.flatMap(r => r.courses);
 
-        if (!token) {
-            showAlert("Invalid reset link", "error");
-            return;
-        }
+            let cgpa      = "—";
+            let cgpaClass = "—";
 
-        try {
-            const res  = await fetch(`${BASE_URL}/api/reset-password`, {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ token, newPassword })
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                showAlert("Password reset successfully! Redirecting to login...", "success");
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 2000);
-            } else {
-                showAlert(data.message || "Failed to reset password", "error");
+            if (allCourses.length > 0) {
+                const weighted = allCourses.reduce((sum, c) => sum + (c.gradePoint * c.unit), 0);
+                const units    = allCourses.reduce((sum, c) => sum + c.unit, 0);
+                cgpa           = (weighted / units).toFixed(2);
+                cgpaClass      = gpaToClassFrontend(parseFloat(cgpa));
             }
-        } catch (err) {
-            showAlert("Server error. Try again.", "error");
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${student.fullname}</td>
+                <td>${student.matric}</td>
+                <td>${student.email}</td>
+                <td>${studentResults.length} semester(s)</td>
+                <td>${cgpa} ${cgpaClass !== "—" ? "(" + cgpaClass + ")" : ""}</td>
+                <td>
+                    <button class="btn-view"   onclick="viewStudentResults('${student.email}', '${student.fullname}')">View Results</button>
+                    <button class="btn-danger" onclick="adminDeleteStudent('${student._id}', '${student.fullname}')">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+    } catch (err) {
+        console.error("Error loading admin students:", err);
+    }
+}
+
+// Helper: GPA → class label (frontend version, no backend call needed)
+function gpaToClassFrontend(gpa) {
+    if (gpa >= 4.50) return "First Class";
+    if (gpa >= 3.50) return "Second Class Upper";
+    if (gpa >= 2.40) return "Second Class Lower";
+    if (gpa >= 1.50) return "Third Class";
+    return "Probation";
+}
+
+// ---- VIEW STUDENT RESULTS ----
+
+async function viewStudentResults(email, fullname) {
+    const token = getToken();
+    if (!token) return;
+
+    try {
+        const res     = await fetch(`${BASE_URL}/api/results/${email}`, {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        const results = await res.json();
+
+        const panel      = document.getElementById("studentResultsPanel");
+        const panelTitle = document.getElementById("resultsPanelTitle");
+        const panelBody  = document.getElementById("resultsPanelBody");
+
+        if (!panel) return;
+
+        panelTitle.textContent = `Results for ${fullname}`;
+        panelBody.innerHTML    = "";
+
+        if (results.length === 0) {
+            panelBody.innerHTML = "<p>No results submitted yet.</p>";
+        } else {
+            results.forEach(result => {
+                const date = new Date(result.date).toLocaleDateString();
+                const div  = document.createElement("div");
+                div.className = "result-item";
+                div.innerHTML = `
+                    <div class="result-item-info">
+                        <strong>${result.level} — ${result.semester}</strong>
+                        <span>GPA: ${result.gpa} / 5.00</span>
+                        <span>${result.academicClass}</span>
+                        <small>${date}</small>
+                    </div>
+                    <button class="btn-danger" onclick="adminDeleteResult('${result._id}')">Delete</button>
+                `;
+                panelBody.appendChild(div);
+            });
         }
-    });
+
+        panel.style.display = "block";
+        panel.scrollIntoView({ behavior: "smooth" });
+
+    } catch (err) {
+        console.error("Error loading student results:", err);
+        showAlert("Failed to load student results.", "error");
+    }
+}
+
+// ---- ADMIN DELETE RESULT ----
+
+async function adminDeleteResult(resultId) {
+    const token = getToken();
+    if (!token) return;
+
+    if (!confirm("Delete this result permanently?")) return;
+
+    try {
+        const res  = await fetch(`${BASE_URL}/api/results/${resultId}`, {
+            method:  "DELETE",
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            showAlert("Result deleted.", "success");
+            // Reload the panel and table
+            loadAdminStudents();
+            document.getElementById("studentResultsPanel").style.display = "none";
+        } else {
+            showAlert(data.message || "Failed to delete result", "error");
+        }
+
+    } catch (err) {
+        console.error(err);
+        showAlert("Server error.", "error");
+    }
+}
+
+// ---- ADMIN DELETE STUDENT ----
+
+async function adminDeleteStudent(studentId, fullname) {
+    const token = getToken();
+    if (!token) return;
+
+    if (!confirm(`Delete student "${fullname}" and ALL their results? This cannot be undone.`)) return;
+
+    try {
+        const res  = await fetch(`${BASE_URL}/api/admin/students/${studentId}`, {
+            method:  "DELETE",
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            showAlert(data.message, "success");
+            loadAdminDashboard();
+            document.getElementById("studentResultsPanel").style.display = "none";
+        } else {
+            showAlert(data.message || "Failed to delete student", "error");
+        }
+
+    } catch (err) {
+        console.error(err);
+        showAlert("Server error.", "error");
+    }
+}
+
+// Auto-load admin dashboard
+if (currentPage === "admin-dashboard.html") {
+    loadAdminDashboard();
 }
