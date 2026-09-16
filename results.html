@@ -3,11 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results History</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Results History — CGPA Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: #080c1a; font-family: 'Inter', sans-serif; color: #e0d5ff; overflow-x: hidden; }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite alternate; }
+        @keyframes twinkle { 0% { opacity: 0.05; } 100% { opacity: 0.5; } }
+        .bg-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at 10% 50%, rgba(72,52,140,0.15) 0%, transparent 60%), radial-gradient(ellipse at 90% 10%, rgba(45,35,110,0.12) 0%, transparent 50%), linear-gradient(180deg, #080c1a 0%, #0d1230 50%, #080c1a 100%); z-index: 0; }
+        .dashboard-layout { display: flex; min-height: 100vh; position: relative; z-index: 10; }
+
+        .sidebar { width: 240px; min-height: 100vh; background: rgba(10,8,28,0.9); border-right: 1px solid rgba(130,100,210,0.15); padding: 32px 16px; display: flex; flex-direction: column; gap: 8px; position: fixed; top: 0; left: 0; height: 100%; backdrop-filter: blur(10px); }
+        .sidebar-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; letter-spacing: 0.1em; color: #c4b0ff; text-align: center; padding: 0 8px 24px; border-bottom: 1px solid rgba(130,100,210,0.15); margin-bottom: 8px; text-shadow: 0 0 20px rgba(160,120,255,0.3); }
+        .sidebar button { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid transparent; background: transparent; color: rgba(180,165,220,0.6); font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; text-align: left; transition: all 0.2s ease; }
+        .sidebar button:hover { background: rgba(130,100,210,0.15); border-color: rgba(130,100,210,0.2); color: #c4b0ff; }
+        .sidebar button.active { background: rgba(130,100,210,0.25); border-color: rgba(130,100,210,0.3); color: #c4b0ff; }
+        .sidebar button:last-child { color: rgba(220,100,100,0.6); }
+        .sidebar button:last-child:hover { background: rgba(180,50,50,0.15); border-color: rgba(180,50,50,0.2); color: #ff9999; }
+
+        .main-content { margin-left: 240px; flex: 1; padding: 36px 32px; max-width: calc(100% - 240px); }
+
+        .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: #c4b0ff; letter-spacing: 0.05em; text-shadow: 0 0 30px rgba(160,120,255,0.3); }
+        .page-header p { font-size: 13px; color: rgba(170,155,210,0.5); margin-top: 4px; }
+
+        .card { background: rgba(15,12,35,0.7); border: 1px solid rgba(130,100,210,0.15); border-radius: 16px; padding: 24px; margin-bottom: 20px; backdrop-filter: blur(10px); transition: border-color 0.2s; }
+        .card:hover { border-color: rgba(130,100,210,0.3); }
+        .card h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: #c4b0ff; letter-spacing: 0.05em; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(130,100,210,0.15); }
+
+        /* STATS GRID */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+        .stat-card { background: rgba(15,12,35,0.7); border: 1px solid rgba(130,100,210,0.15); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px); transition: all 0.2s; }
+        .stat-card:hover { border-color: rgba(130,100,210,0.3); }
+        .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: #c4b0ff; text-shadow: 0 0 20px rgba(160,120,255,0.3); margin-bottom: 6px; }
+        .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(170,155,210,0.4); }
+
+        /* SUMMARY CARD */
+        .summary-row { display: flex; flex-direction: column; gap: 10px; }
+        .summary-item { font-size: 14px; color: rgba(180,165,220,0.7); padding: 10px 0; border-bottom: 1px solid rgba(130,100,210,0.08); }
+        .summary-item:last-child { border-bottom: none; }
+
+        /* RESULTS LIST */
+        #resultsList { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        #resultsList .empty-state { text-align: center; color: rgba(170,155,210,0.4); font-size: 14px; padding: 24px 0; }
+
+        .result-item { display: flex; justify-content: space-between; align-items: center; background: rgba(130,100,210,0.06); border: 1px solid rgba(130,100,210,0.12); border-radius: 12px; padding: 16px 20px; transition: all 0.2s; }
+        .result-item:hover { border-color: rgba(130,100,210,0.25); background: rgba(130,100,210,0.1); }
+        .result-item-info { display: flex; flex-direction: column; gap: 4px; }
+        .result-item-info strong { color: #c4b0ff; font-size: 15px; font-weight: 500; }
+        .result-item-info span { color: rgba(170,155,210,0.6); font-size: 13px; }
+        .result-item-info small { color: rgba(140,125,180,0.4); font-size: 11px; }
+
+        .delete-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(200,80,80,0.3); background: rgba(180,50,50,0.1); color: rgba(220,100,100,0.7); font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .delete-btn:hover { background: rgba(180,50,50,0.25); color: #ff9999; border-color: rgba(200,80,80,0.5); }
+
+        .btn-clear { padding: 12px 24px; border-radius: 50px; border: 1px solid rgba(200,80,80,0.3); background: rgba(180,50,50,0.1); color: rgba(220,100,100,0.7); font-family: 'Cormorant Garamond', serif; font-size: 17px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; }
+        .btn-clear:hover { background: rgba(180,50,50,0.25); color: #ff9999; border-color: rgba(200,80,80,0.5); }
+
+        #customAlert { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; align-items: center; justify-content: center; background: rgba(5,8,20,0.7); backdrop-filter: blur(4px); }
+        #customAlert.show { display: flex; }
+        .alert-box { background: rgba(15,12,35,0.98); border: 1px solid rgba(130,100,210,0.3); border-radius: 20px; padding: 32px 28px; max-width: 320px; width: 90%; text-align: center; box-shadow: 0 0 60px rgba(80,50,180,0.3); }
+        .alert-icon { font-size: 32px; margin-bottom: 10px; }
+        .alert-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: #c4b0ff; margin-bottom: 8px; letter-spacing: 0.05em; }
+        .alert-box p { font-size: 14px; color: rgba(180,165,220,0.7); margin-bottom: 20px; line-height: 1.5; }
+        .alert-btn { padding: 10px 28px; border-radius: 50px; border: none; background: rgba(130,100,220,0.5); color: #e8e0ff; font-family: 'Cormorant Garamond', serif; font-size: 16px; cursor: pointer; }
+        .alert-btn:hover { background: rgba(150,120,240,0.65); }
+        .alert-btn.danger { background: rgba(180,50,50,0.5); }
+        .alert-btn.success { background: rgba(50,150,80,0.5); }
+
+        footer { margin-left: 240px; padding: 20px 32px; font-size: 11px; color: rgba(150,130,190,0.25); letter-spacing: 0.05em; position: relative; z-index: 10; }
+
+        @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; max-width: calc(100% - 200px); padding: 20px 16px; } footer { margin-left: 200px; } .stats-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 
-<body>
 <div id="customAlert">
     <div class="alert-box">
         <div class="alert-icon" id="alertIcon">⚠️</div>
@@ -16,52 +86,82 @@
         <button class="alert-btn" id="alertBtn" onclick="closeAlert()">OK</button>
     </div>
 </div>
-<div class="dashboard-layout">
 
+<body>
+<div class="bg-gradient"></div>
+<div class="stars" id="stars"></div>
+
+<div class="dashboard-layout">
     <div class="sidebar">
-        <h2>🎓 CGPA Portal</h2>
-        <button onclick="window.location.href='dashboard.html'">Dashboard</button>
-        <button onclick="window.location.href='calculator.html'">CGPA Calculator</button>
-        <button onclick="window.location.href='results.html'">Results History</button>
-        <button onclick="window.location.href='profile.html'">My Profile</button>
-        <button onclick="logout()">Logout</button>
+        <div class="sidebar-logo">🎓 CGPA Portal</div>
+        <button onclick="window.location.href='dashboard.html'">📊 Dashboard</button>
+        <button onclick="window.location.href='calculator.html'">🧮 CGPA Calculator</button>
+        <button class="active" onclick="window.location.href='results.html'">📋 Results History</button>
+        <button onclick="window.location.href='profile.html'">👤 My Profile</button>
+        <button onclick="logout()">🚪 Logout</button>
     </div>
 
     <div class="main-content">
-
-        <div class="calculator-header">
-            <h1>Results History</h1>
-            <p>View all previously calculated CGPA records.</p>
+        <div class="page-header">
+            <div>
+                <h1>Results History</h1>
+                <p>Your full academic record across all semesters.</p>
+            </div>
         </div>
 
+        <!-- STATS -->
         <div class="stats-grid">
             <div class="stat-card">
-                <h3 id="historyCount">0</h3>
-                <p>Total Records</p>
+                <div class="stat-value" id="historyCount">—</div>
+                <div class="stat-label">Total Semesters</div>
             </div>
             <div class="stat-card">
-                <h3 id="highestCgpa">0.00</h3>
-                <p>Highest CGPA</p>
+                <div class="stat-value" id="highestCgpa">—</div>
+                <div class="stat-label">Highest GPA</div>
             </div>
             <div class="stat-card">
-                <h3 id="latestCgpa">0.00</h3>
-                <p>Latest CGPA</p>
+                <div class="stat-value" id="latestCgpa">—</div>
+                <div class="stat-label">Latest GPA</div>
             </div>
         </div>
 
-        <div class="table-card">
-            <h3>CGPA History</h3>
-            <ul id="resultsList"></ul>
-            <button onclick="clearResults()">Clear Results History</button>
+        <!-- SUMMARY -->
+        <div class="card">
+            <h3>Academic Summary</h3>
+            <div class="summary-row">
+                <div class="summary-item" id="lastCgpa">Last Semester GPA: —</div>
+                <div class="summary-item" id="totalCalculations">Total Semesters: 0</div>
+                <div class="summary-item" id="academicStatus">Academic Status: —</div>
+            </div>
         </div>
 
+        <!-- RESULTS LIST -->
+        <div class="card">
+            <h3>Semester Results</h3>
+            <ul id="resultsList">
+                <li class="empty-state">Loading results...</li>
+            </ul>
+        </div>
+
+        <!-- CLEAR -->
+        <div class="card" style="text-align: center;">
+            <button class="btn-clear" onclick="clearResults()">🗑 Clear All Results</button>
+        </div>
     </div>
-
 </div>
-<footer>
-    <p>Web-Based Student CGPA Calculator System © 2026</p>
-</footer>
+
+<footer>Web-Based Student CGPA Calculator System © 2026</footer>
 
 <script src="script.js"></script>
+<script>
+    const sc = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+        const s = document.createElement('div');
+        s.classList.add('star');
+        const sz = Math.random() * 2 + 0.5;
+        s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--duration:${Math.random()*4+2}s;animation-delay:${Math.random()*4}s;opacity:${Math.random()*0.3+0.05};`;
+        sc.appendChild(s);
+    }
+</script>
 </body>
 </html>

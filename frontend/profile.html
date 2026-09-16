@@ -4,10 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile — CGPA Portal</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: #080c1a; font-family: 'Inter', sans-serif; color: #e0d5ff; overflow-x: hidden; }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite alternate; }
+        @keyframes twinkle { 0% { opacity: 0.05; } 100% { opacity: 0.5; } }
+        .bg-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at 10% 50%, rgba(72,52,140,0.15) 0%, transparent 60%), radial-gradient(ellipse at 90% 10%, rgba(45,35,110,0.12) 0%, transparent 50%), linear-gradient(180deg, #080c1a 0%, #0d1230 50%, #080c1a 100%); z-index: 0; }
+        .dashboard-layout { display: flex; min-height: 100vh; position: relative; z-index: 10; }
 
-<body>
+        .sidebar { width: 240px; min-height: 100vh; background: rgba(10,8,28,0.9); border-right: 1px solid rgba(130,100,210,0.15); padding: 32px 16px; display: flex; flex-direction: column; gap: 8px; position: fixed; top: 0; left: 0; height: 100%; backdrop-filter: blur(10px); }
+        .sidebar-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; letter-spacing: 0.1em; color: #c4b0ff; text-align: center; padding: 0 8px 24px; border-bottom: 1px solid rgba(130,100,210,0.15); margin-bottom: 8px; text-shadow: 0 0 20px rgba(160,120,255,0.3); }
+        .sidebar button { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid transparent; background: transparent; color: rgba(180,165,220,0.6); font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; text-align: left; transition: all 0.2s ease; }
+        .sidebar button:hover { background: rgba(130,100,210,0.15); border-color: rgba(130,100,210,0.2); color: #c4b0ff; }
+        .sidebar button.active { background: rgba(130,100,210,0.25); border-color: rgba(130,100,210,0.3); color: #c4b0ff; }
+        .sidebar button:last-child { color: rgba(220,100,100,0.6); }
+        .sidebar button:last-child:hover { background: rgba(180,50,50,0.15); border-color: rgba(180,50,50,0.2); color: #ff9999; }
+
+        .main-content { margin-left: 240px; flex: 1; padding: 36px 32px; max-width: calc(100% - 240px); }
+
+        .page-header { margin-bottom: 28px; }
+        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: #c4b0ff; letter-spacing: 0.05em; text-shadow: 0 0 30px rgba(160,120,255,0.3); }
+        .page-header p { font-size: 13px; color: rgba(170,155,210,0.5); margin-top: 4px; }
+
+        .card { background: rgba(15,12,35,0.7); border: 1px solid rgba(130,100,210,0.15); border-radius: 16px; padding: 24px; margin-bottom: 20px; backdrop-filter: blur(10px); transition: border-color 0.2s; }
+        .card:hover { border-color: rgba(130,100,210,0.3); }
+        .card h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: #c4b0ff; letter-spacing: 0.05em; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(130,100,210,0.15); }
+
+        /* PROFILE DISPLAY */
+        .profile-display { display: flex; align-items: center; gap: 20px; }
+        .profile-avatar { width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #4a3580, #1e1650, #0a0820); border: 1px solid rgba(140,110,220,0.3); box-shadow: 0 0 25px rgba(100,70,200,0.25); display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+        .profile-display-text h2 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: #c4b0ff; letter-spacing: 0.03em; }
+        .profile-display-text p { font-size: 13px; color: rgba(170,155,210,0.5); margin-top: 4px; }
+
+        /* FORM */
+        label { display: block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(180,160,230,0.6); margin-bottom: 7px; margin-top: 16px; }
+        label:first-of-type { margin-top: 0; }
+        .form-note { font-size: 12px; color: rgba(170,155,210,0.4); margin-bottom: 20px; letter-spacing: 0.02em; }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%; padding: 13px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(130,100,210,0.2);
+            border-radius: 12px; color: #e0d5ff;
+            font-size: 14px; font-family: 'Inter', sans-serif;
+            outline: none; transition: border-color 0.2s, background 0.2s;
+        }
+        input:focus { border-color: rgba(160,130,255,0.5); background: rgba(255,255,255,0.07); }
+        input::placeholder { color: rgba(160,140,200,0.3); }
+        input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-save { margin-top: 24px; width: 100%; padding: 14px; border-radius: 50px; border: none; background: rgba(130,100,220,0.5); color: #e8e0ff; font-family: 'Cormorant Garamond', serif; font-size: 18px; letter-spacing: 0.05em; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(120,80,220,0.3); }
+        .btn-save:hover { background: rgba(150,120,240,0.65); box-shadow: 0 0 30px rgba(140,100,240,0.5); transform: translateY(-1px); }
+
+        .btn-danger { margin-top: 24px; width: 100%; padding: 14px; border-radius: 50px; border: 1px solid rgba(200,80,80,0.3); background: rgba(180,50,50,0.15); color: rgba(220,100,100,0.8); font-family: 'Cormorant Garamond', serif; font-size: 18px; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; }
+        .btn-danger:hover { background: rgba(180,50,50,0.3); color: #ff9999; border-color: rgba(200,80,80,0.5); }
+
+        #customAlert { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; align-items: center; justify-content: center; background: rgba(5,8,20,0.7); backdrop-filter: blur(4px); }
+        #customAlert.show { display: flex; }
+        .alert-box { background: rgba(15,12,35,0.98); border: 1px solid rgba(130,100,210,0.3); border-radius: 20px; padding: 32px 28px; max-width: 320px; width: 90%; text-align: center; box-shadow: 0 0 60px rgba(80,50,180,0.3); }
+        .alert-icon { font-size: 32px; margin-bottom: 10px; }
+        .alert-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: #c4b0ff; margin-bottom: 8px; letter-spacing: 0.05em; }
+        .alert-box p { font-size: 14px; color: rgba(180,165,220,0.7); margin-bottom: 20px; line-height: 1.5; }
+        .alert-btn { padding: 10px 28px; border-radius: 50px; border: none; background: rgba(130,100,220,0.5); color: #e8e0ff; font-family: 'Cormorant Garamond', serif; font-size: 16px; cursor: pointer; }
+        .alert-btn:hover { background: rgba(150,120,240,0.65); }
+        .alert-btn.danger { background: rgba(180,50,50,0.5); }
+        .alert-btn.success { background: rgba(50,150,80,0.5); }
+
+        footer { margin-left: 240px; padding: 20px 32px; font-size: 11px; color: rgba(150,130,190,0.25); letter-spacing: 0.05em; position: relative; z-index: 10; }
+
+        @media (max-width: 768px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; max-width: calc(100% - 200px); padding: 20px 16px; } footer { margin-left: 200px; } }
+    </style>
+</head>
 
 <div id="customAlert">
     <div class="alert-box">
@@ -17,104 +88,76 @@
         <button class="alert-btn" id="alertBtn" onclick="closeAlert()">OK</button>
     </div>
 </div>
-<div class="dashboard-layout">
 
-    <!-- SIDEBAR -->
+<body>
+<div class="bg-gradient"></div>
+<div class="stars" id="stars"></div>
+
+<div class="dashboard-layout">
     <div class="sidebar">
-        <h2>🎓 CGPA Portal</h2>
-        <button onclick="window.location.href='dashboard.html'">Dashboard</button>
-        <button onclick="window.location.href='calculator.html'">CGPA Calculator</button>
-        <button onclick="window.location.href='results.html'">Results History</button>
-        <button onclick="window.location.href='profile.html'" class="active">My Profile</button>
-        <button onclick="logout()">Logout</button>
+        <div class="sidebar-logo">🎓 CGPA Portal</div>
+        <button onclick="window.location.href='dashboard.html'">📊 Dashboard</button>
+        <button onclick="window.location.href='calculator.html'">🧮 CGPA Calculator</button>
+        <button onclick="window.location.href='results.html'">📋 Results History</button>
+        <button class="active" onclick="window.location.href='profile.html'">👤 My Profile</button>
+        <button onclick="logout()">🚪 Logout</button>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
-
-        <div class="calculator-header">
+        <div class="page-header">
             <h1>My Profile</h1>
             <p>View and update your account information.</p>
         </div>
 
-        <!-- PROFILE DISPLAY CARD -->
-        <div class="calculator-card profile-display-card">
-            <div class="profile-avatar">
-                👤
-            </div>
-            <div class="profile-display-info">
+        <!-- PROFILE DISPLAY -->
+        <div class="card profile-display">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-display-text">
                 <h2 id="profileDisplayName">Loading...</h2>
                 <p id="profileDisplayEmail">Loading...</p>
             </div>
         </div>
 
-        <!-- UPDATE INFO CARD -->
-        <div class="calculator-card">
+        <!-- PERSONAL INFO -->
+        <div class="card">
             <h3>Personal Information</h3>
             <p class="form-note">Email address cannot be changed.</p>
-
             <label>Full Name</label>
-            <input
-                type="text"
-                id="profileFullname"
-                placeholder="Enter your full name"
-            >
-
+            <input type="text" id="profileFullname" placeholder="Enter your full name">
             <label>Matric Number</label>
-            <input
-                type="text"
-                id="profileMatric"
-                placeholder="Enter your matric number"
-            >
-
+            <input type="text" id="profileMatric" placeholder="Enter your matric number">
             <label>Email Address</label>
-            <input
-                type="email"
-                id="profileEmail"
-                placeholder="Your email"
-                disabled
-                style="opacity: 0.6; cursor: not-allowed;"
-            >
-
-            <button onclick="updateProfile()">Save Changes</button>
+            <input type="email" id="profileEmail" placeholder="Your email" disabled>
+            <button class="btn-save" onclick="updateProfile()">Save Changes</button>
         </div>
 
-        <!-- CHANGE PASSWORD CARD -->
-        <div class="calculator-card">
+        <!-- CHANGE PASSWORD -->
+        <div class="card">
             <h3>Change Password</h3>
             <p class="form-note">You will be logged out after changing your password.</p>
-
             <label>Current Password</label>
-            <input
-                type="password"
-                id="oldPassword"
-                placeholder="Enter current password"
-            >
-
+            <input type="password" id="oldPassword" placeholder="Enter current password">
             <label>New Password</label>
-            <input
-                type="password"
-                id="newPassword"
-                placeholder="Enter new password"
-            >
-
+            <input type="password" id="newPassword" placeholder="Enter new password">
             <label>Confirm New Password</label>
-            <input
-                type="password"
-                id="confirmNewPassword"
-                placeholder="Confirm new password"
-            >
-
-            <button onclick="changePassword()" class="btn-danger">Change Password</button>
+            <input type="password" id="confirmNewPassword" placeholder="Confirm new password">
+            <button class="btn-danger" onclick="changePassword()">Change Password</button>
         </div>
-
     </div>
 </div>
 
-<footer>
-    <p>Web-Based Student CGPA Calculator System © 2026</p>
-</footer>
+<footer>Web-Based Student CGPA Calculator System © 2026</footer>
 
 <script src="script.js"></script>
+<script>
+    const sc = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+        const s = document.createElement('div');
+        s.classList.add('star');
+        const sz = Math.random() * 2 + 0.5;
+        s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--duration:${Math.random()*4+2}s;animation-delay:${Math.random()*4}s;opacity:${Math.random()*0.3+0.05};`;
+        sc.appendChild(s);
+    }
+</script>
 </body>
 </html>
