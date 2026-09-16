@@ -3,11 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CGPA Calculator</title>
-    <link rel="stylesheet" href="style.css">
+    <title>CGPA Calculator — CGPA Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background: #080c1a;
+            font-family: 'Inter', sans-serif;
+            color: #e0d5ff;
+            overflow-x: hidden;
+        }
+
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite alternate; }
+        @keyframes twinkle { 0% { opacity: 0.05; } 100% { opacity: 0.5; } }
+
+        .bg-gradient {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background:
+                radial-gradient(ellipse at 10% 50%, rgba(72,52,140,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 90% 10%, rgba(45,35,110,0.12) 0%, transparent 50%),
+                linear-gradient(180deg, #080c1a 0%, #0d1230 50%, #080c1a 100%);
+            z-index: 0;
+        }
+
+        .dashboard-layout { display: flex; min-height: 100vh; position: relative; z-index: 10; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px; min-height: 100vh;
+            background: rgba(10,8,28,0.9);
+            border-right: 1px solid rgba(130,100,210,0.15);
+            padding: 32px 16px;
+            display: flex; flex-direction: column; gap: 8px;
+            position: fixed; top: 0; left: 0; height: 100%;
+            backdrop-filter: blur(10px);
+        }
+        .sidebar-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px; font-weight: 400;
+            letter-spacing: 0.1em; color: #c4b0ff;
+            text-align: center;
+            padding: 0 8px 24px;
+            border-bottom: 1px solid rgba(130,100,210,0.15);
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(160,120,255,0.3);
+        }
+        .sidebar button {
+            width: 100%; padding: 12px 16px;
+            border-radius: 12px; border: 1px solid transparent;
+            background: transparent; color: rgba(180,165,220,0.6);
+            font-family: 'Inter', sans-serif; font-size: 13px;
+            cursor: pointer; text-align: left; transition: all 0.2s ease;
+        }
+        .sidebar button:hover { background: rgba(130,100,210,0.15); border-color: rgba(130,100,210,0.2); color: #c4b0ff; }
+        .sidebar button.active { background: rgba(130,100,210,0.25); border-color: rgba(130,100,210,0.3); color: #c4b0ff; }
+        .sidebar button:last-child { color: rgba(220,100,100,0.6); }
+        .sidebar button:last-child:hover { background: rgba(180,50,50,0.15); border-color: rgba(180,50,50,0.2); color: #ff9999; }
+
+        /* MAIN */
+        .main-content { margin-left: 240px; flex: 1; padding: 36px 32px; max-width: calc(100% - 240px); }
+
+        .page-header { margin-bottom: 28px; }
+        .page-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: #c4b0ff; letter-spacing: 0.05em; text-shadow: 0 0 30px rgba(160,120,255,0.3); }
+        .page-header p { font-size: 13px; color: rgba(170,155,210,0.5); margin-top: 4px; }
+
+        /* CARDS */
+        .card {
+            background: rgba(15,12,35,0.7);
+            border: 1px solid rgba(130,100,210,0.15);
+            border-radius: 16px; padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: rgba(130,100,210,0.3); }
+
+        .card h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px; font-weight: 400;
+            color: #c4b0ff; letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(130,100,210,0.15);
+        }
+
+        /* FORM ELEMENTS */
+        label {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(180,160,230,0.6);
+            margin-bottom: 7px;
+            margin-top: 16px;
+        }
+        label:first-of-type { margin-top: 0; }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(130,100,210,0.2);
+            border-radius: 12px;
+            color: #e0d5ff;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            -webkit-appearance: none;
+        }
+        input:focus, select:focus {
+            border-color: rgba(160,130,255,0.5);
+            background: rgba(255,255,255,0.07);
+        }
+        input::placeholder { color: rgba(160,140,200,0.3); }
+        select option { background: #0d1230; color: #e0d5ff; }
+
+        /* SEMESTER ROW */
+        .semester-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* BUTTONS */
+        .btn-add {
+            margin-top: 20px;
+            padding: 13px 24px;
+            border-radius: 50px; border: none;
+            background: rgba(130,100,220,0.4);
+            color: #e8e0ff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 17px; letter-spacing: 0.05em;
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 0 15px rgba(120,80,220,0.2);
+            width: 100%;
+        }
+        .btn-add:hover { background: rgba(150,120,240,0.55); box-shadow: 0 0 25px rgba(140,100,240,0.4); }
+
+        .btn-calculate {
+            padding: 15px 32px;
+            border-radius: 50px; border: none;
+            background: rgba(130,100,220,0.5);
+            color: #e8e0ff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px; letter-spacing: 0.05em;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(120,80,220,0.3);
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .btn-calculate:hover { background: rgba(150,120,240,0.65); box-shadow: 0 0 35px rgba(140,100,240,0.5); transform: translateY(-1px); }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            text-align: left; padding: 10px 14px;
+            font-size: 11px; letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(170,155,210,0.4);
+            border-bottom: 1px solid rgba(130,100,210,0.15);
+        }
+        tbody td {
+            padding: 13px 14px;
+            font-size: 14px;
+            color: rgba(200,185,240,0.8);
+            border-bottom: 1px solid rgba(130,100,210,0.08);
+        }
+        tbody tr:hover td { background: rgba(130,100,210,0.05); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .btn-delete {
+            padding: 5px 14px;
+            border-radius: 20px; border: 1px solid rgba(200,80,80,0.3);
+            background: rgba(180,50,50,0.1);
+            color: rgba(220,100,100,0.7);
+            font-size: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-delete:hover { background: rgba(180,50,50,0.25); color: #ff9999; border-color: rgba(200,80,80,0.5); }
+
+        /* RESULT */
+        #result {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px; font-weight: 300;
+            color: rgba(170,155,210,0.6);
+            line-height: 1.7;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        /* ALERT */
+        #customAlert { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; align-items: center; justify-content: center; background: rgba(5,8,20,0.7); backdrop-filter: blur(4px); }
+        #customAlert.show { display: flex; }
+        .alert-box { background: rgba(15,12,35,0.98); border: 1px solid rgba(130,100,210,0.3); border-radius: 20px; padding: 32px 28px; max-width: 320px; width: 90%; text-align: center; box-shadow: 0 0 60px rgba(80,50,180,0.3); }
+        .alert-icon { font-size: 32px; margin-bottom: 10px; }
+        .alert-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: #c4b0ff; margin-bottom: 8px; letter-spacing: 0.05em; }
+        .alert-box p { font-size: 14px; color: rgba(180,165,220,0.7); margin-bottom: 20px; line-height: 1.5; }
+        .alert-btn { padding: 10px 28px; border-radius: 50px; border: none; background: rgba(130,100,220,0.5); color: #e8e0ff; font-family: 'Cormorant Garamond', serif; font-size: 16px; cursor: pointer; transition: all 0.2s; }
+        .alert-btn:hover { background: rgba(150,120,240,0.65); }
+        .alert-btn.danger { background: rgba(180,50,50,0.5); }
+        .alert-btn.success { background: rgba(50,150,80,0.5); }
+
+        footer { margin-left: 240px; padding: 20px 32px; font-size: 11px; color: rgba(150,130,190,0.25); letter-spacing: 0.05em; position: relative; z-index: 10; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; }
+            .main-content { margin-left: 200px; max-width: calc(100% - 200px); padding: 20px 16px; }
+            footer { margin-left: 200px; }
+            .semester-row { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 
-<body>
 <div id="customAlert">
     <div class="alert-box">
         <div class="alert-icon" id="alertIcon">⚠️</div>
@@ -16,56 +228,60 @@
         <button class="alert-btn" id="alertBtn" onclick="closeAlert()">OK</button>
     </div>
 </div>
-<div class="dashboard-layout">
 
+<body>
+<div class="bg-gradient"></div>
+<div class="stars" id="stars"></div>
+
+<div class="dashboard-layout">
     <div class="sidebar">
-        <h2>🎓 CGPA Portal</h2>
-        <button onclick="window.location.href='dashboard.html'">Dashboard</button>
-        <button onclick="window.location.href='calculator.html'">CGPA Calculator</button>
-        <button onclick="window.location.href='results.html'">Results History</button>
-        <button onclick="window.location.href='profile.html'">My Profile</button>
-        <button onclick="logout()">Logout</button>
+        <div class="sidebar-logo">🎓 CGPA Portal</div>
+        <button onclick="window.location.href='dashboard.html'">📊 Dashboard</button>
+        <button class="active" onclick="window.location.href='calculator.html'">🧮 CGPA Calculator</button>
+        <button onclick="window.location.href='results.html'">📋 Results History</button>
+        <button onclick="window.location.href='profile.html'">👤 My Profile</button>
+        <button onclick="logout()">🚪 Logout</button>
     </div>
 
     <div class="main-content">
-
-        <div class="calculator-header">
+        <div class="page-header">
             <h1>CGPA Calculator</h1>
-            <p>Select your level and semester, add your courses, then calculate.</p>
+            <p>Select your semester, add your courses, then calculate.</p>
         </div>
 
-        <!-- ✅ NEW: Level & Semester Selection -->
-        <div class="calculator-card">
+        <!-- SEMESTER SELECTION -->
+        <div class="card">
             <h3>Semester Information</h3>
-
-            <label>Academic Level</label>
-            <select id="levelSelect">
-                <option value="">-- Select Level --</option>
-                <option value="100L">100 Level</option>
-                <option value="200L">200 Level</option>
-                <option value="300L">300 Level</option>
-                <option value="400L">400 Level</option>
-                <option value="500L">500 Level</option>
-            </select>
-
-            <label>Semester</label>
-            <select id="semesterSelect">
-                <option value="">-- Select Semester --</option>
-                <option value="First Semester">First Semester</option>
-                <option value="Second Semester">Second Semester</option>
-            </select>
+            <div class="semester-row">
+                <div>
+                    <label>Academic Level</label>
+                    <select id="levelSelect">
+                        <option value="">— Select Level —</option>
+                        <option value="100L">100 Level</option>
+                        <option value="200L">200 Level</option>
+                        <option value="300L">300 Level</option>
+                        <option value="400L">400 Level</option>
+                        <option value="500L">500 Level</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Semester</label>
+                    <select id="semesterSelect">
+                        <option value="">— Select Semester —</option>
+                        <option value="First Semester">First Semester</option>
+                        <option value="Second Semester">Second Semester</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
-        <!-- Course Entry -->
-        <div class="calculator-card">
+        <!-- ADD COURSE -->
+        <div class="card">
             <h3>Add New Course</h3>
-
             <label>Course Code</label>
             <input type="text" id="courseCode" placeholder="e.g. CSC 411">
-
             <label>Course Unit</label>
             <input type="number" id="courseUnit" placeholder="e.g. 3">
-
             <label>Grade</label>
             <select id="grade">
                 <option value="A">A</option>
@@ -75,12 +291,11 @@
                 <option value="E">E</option>
                 <option value="F">F</option>
             </select>
-
-            <button onclick="addCourse()">Add Course</button>
+            <button class="btn-add" onclick="addCourse()">+ Add Course</button>
         </div>
 
-        <!-- Course Table -->
-        <div class="table-card">
+        <!-- COURSE TABLE -->
+        <div class="card">
             <h3>Registered Courses</h3>
             <table id="courseTable">
                 <thead>
@@ -95,20 +310,26 @@
             </table>
         </div>
 
-        <!-- Result Display -->
-        <div class="result-card">
-            <button onclick="calculateCGPA()">Calculate & Save CGPA</button>
-            <h2 id="result">Your result will appear here after calculation.</h2>
+        <!-- CALCULATE -->
+        <div class="card">
+            <button class="btn-calculate" onclick="calculateCGPA()">Calculate &amp; Save CGPA</button>
+            <div id="result">Your result will appear here after calculation.</div>
         </div>
-
     </div>
-
 </div>
 
-<footer>
-    <p>Web-Based Student CGPA Calculator System © 2026</p>
-</footer>
+<footer>Web-Based Student CGPA Calculator System © 2026</footer>
 
 <script src="script.js"></script>
+<script>
+    const sc = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+        const s = document.createElement('div');
+        s.classList.add('star');
+        const sz = Math.random() * 2 + 0.5;
+        s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--duration:${Math.random()*4+2}s;animation-delay:${Math.random()*4}s;opacity:${Math.random()*0.3+0.05};`;
+        sc.appendChild(s);
+    }
+</script>
 </body>
 </html>
