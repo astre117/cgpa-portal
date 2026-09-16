@@ -3,11 +3,462 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student CGPA Management System</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Student CGPA System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #080c1a;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* =====================
+           STAR FIELD
+        ===================== */
+
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0%   { opacity: 0.1; transform: scale(1); }
+            100% { opacity: 0.9; transform: scale(1.3); }
+        }
+
+        /* =====================
+           GRADIENT BACKGROUND
+        ===================== */
+
+        .bg-gradient {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(72, 52, 140, 0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(45, 35, 110, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 80%, rgba(30, 20, 80, 0.3) 0%, transparent 50%),
+                linear-gradient(180deg, #080c1a 0%, #0d1230 40%, #080c1a 100%);
+            z-index: 0;
+        }
+
+        /* =====================
+           MAIN CONTAINER
+        ===================== */
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 20px 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* =====================
+           LOGO CIRCLE
+        ===================== */
+
+        .logo-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%,
+                #4a3580 0%,
+                #1e1650 40%,
+                #0a0820 100%);
+            border: 1px solid rgba(140, 110, 220, 0.3);
+            box-shadow:
+                0 0 40px rgba(100, 70, 200, 0.3),
+                0 0 80px rgba(80, 50, 180, 0.15),
+                inset 0 0 30px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 36px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-circle::before {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle at 30% 30%,
+                rgba(160, 120, 255, 0.15) 0%,
+                transparent 60%);
+        }
+
+        .logo-icon {
+            font-size: 72px;
+            filter: drop-shadow(0 0 12px rgba(160, 120, 255, 0.6));
+            position: relative;
+            z-index: 1;
+        }
+
+        /* =====================
+           TITLE
+        ===================== */
+
+        .title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 52px;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #c4b0ff;
+            text-shadow:
+                0 0 30px rgba(160, 120, 255, 0.5),
+                0 0 60px rgba(120, 80, 220, 0.2);
+            margin-bottom: 12px;
+            line-height: 1;
+        }
+
+        .subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            font-weight: 300;
+            color: rgba(180, 165, 220, 0.7);
+            letter-spacing: 0.05em;
+            margin-bottom: 48px;
+        }
+
+        /* =====================
+           LANDING BUTTONS
+        ===================== */
+
+        .landing-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-primary {
+            padding: 16px 32px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(130, 100, 220, 0.5);
+            color: #e8e0ff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow:
+                0 0 20px rgba(120, 80, 220, 0.3),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .btn-primary:hover {
+            background: rgba(150, 120, 240, 0.65);
+            box-shadow:
+                0 0 30px rgba(140, 100, 240, 0.5),
+                inset 0 1px 0 rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            padding: 15px 32px;
+            border-radius: 50px;
+            border: 1px solid rgba(140, 110, 220, 0.35);
+            background: transparent;
+            color: rgba(200, 185, 255, 0.8);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(160, 130, 255, 0.6);
+            color: #e0d5ff;
+            background: rgba(120, 90, 200, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* =====================
+           FORM OVERLAY
+        ===================== */
+
+        .form-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-overlay.show {
+            display: flex;
+        }
+
+        .form-backdrop {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(5, 8, 20, 0.85);
+            backdrop-filter: blur(8px);
+        }
+
+        .form-card {
+            position: relative;
+            z-index: 10;
+            background: rgba(15, 12, 35, 0.95);
+            border: 1px solid rgba(130, 100, 210, 0.25);
+            border-radius: 24px;
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow:
+                0 0 60px rgba(80, 50, 180, 0.2),
+                0 20px 60px rgba(0,0,0,0.6);
+        }
+
+        .form-card h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 400;
+            color: #c4b0ff;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .form-card p {
+            font-size: 13px;
+            color: rgba(170, 155, 210, 0.6);
+            text-align: center;
+            margin-bottom: 28px;
+            letter-spacing: 0.03em;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 16px; right: 20px;
+            background: none;
+            border: none;
+            color: rgba(180, 160, 230, 0.5);
+            font-size: 22px;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover { color: #c4b0ff; }
+
+        /* =====================
+           FORM FIELDS
+        ===================== */
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(180, 160, 230, 0.6);
+            margin-bottom: 7px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(130, 100, 210, 0.2);
+            border-radius: 12px;
+            color: #e0d5ff;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .field input:focus {
+            border-color: rgba(160, 130, 255, 0.5);
+            background: rgba(255,255,255,0.07);
+        }
+
+        .field input::placeholder { color: rgba(160, 140, 200, 0.3); }
+
+        /* Show password row */
+        .show-pass-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .show-pass-row input[type="checkbox"] {
+            width: 15px; height: 15px;
+            accent-color: #9b7dff;
+            cursor: pointer;
+        }
+
+        .show-pass-row label {
+            font-size: 12px;
+            color: rgba(170, 155, 210, 0.6);
+            cursor: pointer;
+        }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(130, 100, 220, 0.5);
+            color: #e8e0ff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(120, 80, 220, 0.3);
+            margin-bottom: 18px;
+        }
+
+        .btn-submit:hover {
+            background: rgba(150, 120, 240, 0.65);
+            box-shadow: 0 0 30px rgba(140, 100, 240, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .form-switch {
+            text-align: center;
+            font-size: 13px;
+            color: rgba(170, 155, 210, 0.5);
+        }
+
+        .form-switch a {
+            color: #a98fff;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .form-switch a:hover { color: #c4b0ff; }
+
+        /* =====================
+           CUSTOM ALERT
+        ===================== */
+
+        #customAlert {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #customAlert.show { display: flex; }
+
+        .alert-box {
+            background: rgba(15, 12, 35, 0.98);
+            border: 1px solid rgba(130, 100, 210, 0.3);
+            border-radius: 20px;
+            padding: 32px 28px;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(80, 50, 180, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .alert-icon { font-size: 32px; margin-bottom: 10px; }
+
+        .alert-box h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px;
+            color: #c4b0ff;
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .alert-box p {
+            font-size: 14px;
+            color: rgba(180, 165, 220, 0.7);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .alert-btn {
+            padding: 10px 28px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(130, 100, 220, 0.5);
+            color: #e8e0ff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .alert-btn:hover { background: rgba(150, 120, 240, 0.65); }
+        .alert-btn.danger { background: rgba(180, 50, 50, 0.5); }
+        .alert-btn.success { background: rgba(50, 150, 80, 0.5); }
+
+        /* =====================
+           FOOTER
+        ===================== */
+
+        .page-footer {
+            position: fixed;
+            bottom: 20px;
+            font-size: 11px;
+            color: rgba(150, 130, 190, 0.3);
+            letter-spacing: 0.05em;
+            z-index: 10;
+        }
+    </style>
 </head>
 
 <body>
+
+<!-- BACKGROUND -->
+<div class="bg-gradient"></div>
+<div class="stars" id="stars"></div>
+
+<!-- CUSTOM ALERT -->
 <div id="customAlert">
     <div class="alert-box">
         <div class="alert-icon" id="alertIcon">⚠️</div>
@@ -16,68 +467,141 @@
         <button class="alert-btn" id="alertBtn" onclick="closeAlert()">OK</button>
     </div>
 </div>
-<div class="auth-container">
 
-    <div class="auth-left">
-        <h1>Student CGPA System</h1>
-        <p>
-            Calculate, manage and monitor your academic
-            performance through a modern web platform.
-        </p>
+<!-- MAIN LANDING -->
+<div class="container" id="landingView">
+    <div class="logo-circle">
+        <span class="logo-icon">🎓</span>
     </div>
-
-    <div class="auth-card">
-        <h1>Student CGPA</h1>
-        <h2 id="formTitle">Create Account</h2>
-        <p id="formSubtitle">
-            Create your account to access the CGPA portal
-        </p>
-
-        <!-- SIGNUP FORM -->
-        <form id="signupForm">
-            <input type="text" id="fullname" placeholder="Full Name" required>
-            <input type="text" id="matric" placeholder="Matric Number" required>
-            <input type="email" id="signupEmail" placeholder="Email Address" required>
-            <input type="password" id="signupPassword" placeholder="Password" required>
-            <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
-            <label>
-                <input type="checkbox" id="showSignupPassword">
-                Show Password
-            </label>
-            <button type="submit">Create Account</button>
-        </form>
-
-        <!-- LOGIN FORM -->
-        <form id="loginForm" style="display:none;">
-            <input type="email" id="loginEmail" placeholder="Email Address" required>
-            <input type="password" id="loginPassword" placeholder="Password" required>
-            <label>
-                <input type="checkbox" id="showLoginPassword">
-                Show Password
-            </label>
-            <button type="submit">Login</button>
-        </form>
-        <!-- FORGOT PASSWORD FORM -->
-        <form id="forgotPasswordForm" style="display:none;">
-            <input type="email" id="resetEmail" placeholder="Enter your email address" required>
-            <button type="submit">Send Reset Link</button>
-        </form>
-
-        <p id="toggleText">
-    <span id="toggleMessage">Already have an account?</span>
-    <a href="#" id="toggleForm">Login</a>
-</p>
-
-<p id="forgotPasswordText" style="display:none;">
-    <a href="#" id="forgotPasswordLink">Forgot Password?</a>
-</p>
+    <h1 class="title">CGPA</h1>
+    <p class="subtitle">Track your academic journey.</p>
+    <div class="landing-buttons">
+        <button class="btn-primary" onclick="showForm('login')">Log in</button>
+        <button class="btn-secondary" onclick="showForm('signup')">Create Account</button>
     </div>
-
 </div>
-<footer>
-    <p>Web-Based Student CGPA Calculator System © 2026</p>
-</footer>
+
+<!-- LOGIN FORM OVERLAY -->
+<div class="form-overlay" id="loginOverlay">
+    <div class="form-backdrop" onclick="hideForm('login')"></div>
+    <div class="form-card">
+        <button class="close-btn" onclick="hideForm('login')">✕</button>
+        <h2>Welcome Back</h2>
+        <p>Login to continue to your dashboard</p>
+
+        <form id="loginForm">
+            <div class="field">
+                <label>Email Address</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com" required>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+            </div>
+            <div class="show-pass-row">
+                <input type="checkbox" id="showLoginPassword">
+                <label for="showLoginPassword">Show password</label>
+            </div>
+            <button type="submit" class="btn-submit">Log in</button>
+            <div class="form-switch">
+                Don't have an account?
+                <a onclick="switchForm('signup')">Create Account</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- SIGNUP FORM OVERLAY -->
+<div class="form-overlay" id="signupOverlay">
+    <div class="form-backdrop" onclick="hideForm('signup')"></div>
+    <div class="form-card">
+        <button class="close-btn" onclick="hideForm('signup')">✕</button>
+        <h2>Create Account</h2>
+        <p>Join the CGPA portal to track your academic performance</p>
+
+        <form id="signupForm">
+            <div class="field">
+                <label>Full Name</label>
+                <input type="text" id="fullname" placeholder="Your full name" required>
+            </div>
+            <div class="field">
+                <label>Matric Number</label>
+                <input type="text" id="matric" placeholder="e.g. COS/8728/2021" required>
+            </div>
+            <div class="field">
+                <label>Email Address</label>
+                <input type="email" id="signupEmail" placeholder="your@email.com" required>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" id="signupPassword" placeholder="Create a password" required>
+            </div>
+            <div class="field">
+                <label>Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Repeat your password" required>
+            </div>
+            <div class="show-pass-row">
+                <input type="checkbox" id="showSignupPassword">
+                <label for="showSignupPassword">Show password</label>
+            </div>
+            <button type="submit" class="btn-submit">Create Account</button>
+            <div class="form-switch">
+                Already have an account?
+                <a onclick="switchForm('login')">Log in</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<p class="page-footer">Student CGPA Management System © 2026</p>
 
 <script src="script.js"></script>
+<script>
+    // =====================
+    // GENERATE STARS
+    // =====================
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 150; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        const size = Math.random() * 2.5 + 0.5;
+        star.style.cssText = `
+            width: ${size}px;
+            height: ${size}px;
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+            --duration: ${Math.random() * 4 + 2}s;
+            animation-delay: ${Math.random() * 4}s;
+            opacity: ${Math.random() * 0.6 + 0.1};
+        `;
+        starsContainer.appendChild(star);
+    }
+
+    // =====================
+    // FORM SHOW / HIDE
+    // =====================
+    function showForm(type) {
+        document.getElementById(type + 'Overlay').classList.add('show');
+    }
+
+    function hideForm(type) {
+        document.getElementById(type + 'Overlay').classList.remove('show');
+    }
+
+    function switchForm(type) {
+        hideForm(type === 'login' ? 'signup' : 'login');
+        showForm(type);
+    }
+
+    // Show password toggles
+    document.getElementById('showLoginPassword').addEventListener('change', function() {
+        document.getElementById('loginPassword').type = this.checked ? 'text' : 'password';
+    });
+
+    document.getElementById('showSignupPassword').addEventListener('change', function() {
+        document.getElementById('signupPassword').type   = this.checked ? 'text' : 'password';
+        document.getElementById('confirmPassword').type  = this.checked ? 'text' : 'password';
+    });
+</script>
 </body>
 </html>
